@@ -46,7 +46,7 @@ function parseCommands(commandBuffer: Buffer) {
 }
 
 // The struct used for the main graphics data.
-const mainGraphicStruct = (frameHeight: number) => {
+function mainGraphicStruct(frameHeight: number) {
     return Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
@@ -63,7 +63,7 @@ const mainGraphicStruct = (frameHeight: number) => {
 }
 
 // The struct used for outlines and shadows.
-const secondaryGraphicStruct = (frameHeight: number) => {
+function secondaryGraphicStruct(frameHeight: number) {
     return Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
