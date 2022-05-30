@@ -25,15 +25,15 @@ export default class Smx {
         this.parsed = struct(this.buffer, this.palettes);
     }
 
-    getFramesCount(): number {
+    public getFramesCount(): number {
         return this.parsed.frames.length;
     }
 
-    getFrame(frameIdx: number) {
+    public getFrame(frameIdx: number) {
         return this.parsed.frames[frameIdx];
     }
 
-    renderFrame (frameIdx: number, player: number) {
+    public renderFrame (frameIdx: number, player: number) {
         this.writtenPixelBytes = 0;
         this.consumedPixels = 0;
         this.yIndex = 0;
@@ -67,7 +67,7 @@ export default class Smx {
         return this.imageData;
     }
 
-    renderShadow (frameIdx: number) {
+    public renderShadow (frameIdx: number) {
         this.writtenPixelBytes = 0;
         this.yIndex = 0;
         this.yPixels = 0;
@@ -123,7 +123,7 @@ export default class Smx {
         return this.imageData;
     }
 
-    peekEmptyRows() {
+    private peekEmptyRows() {
         let peekedSpacing = this.spacing[this.yIndex] ? this.spacing[this.yIndex].leftSpacing : 0;
         while (peekedSpacing === -1) {
             const width = this.drawingLayer.width;
@@ -136,7 +136,7 @@ export default class Smx {
         }
     }
 
-    fillPixel() {
+    private fillPixel() {
         const pixelValue = this.drawingLayer.pixelData.pixels[this.consumedPixels];
         this.consumedPixels++;
         this.yPixels++;
@@ -148,7 +148,7 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = 255;
     }
 
-    fillRandomPixel() {
+    private fillRandomPixel() {
         this.yPixels++;
         this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
         this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
@@ -156,7 +156,7 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
     }
 
-    fillAlphaPixel(alpha: number) {
+    private fillAlphaPixel(alpha: number) {
         this.yPixels++;
         this.pixels[this.writtenPixelBytes++] = 0;
         this.pixels[this.writtenPixelBytes++] = 0;
@@ -164,7 +164,7 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = alpha;
     }
 
-    fillPlayerPixel(player: number) {
+    private fillPlayerPixel(player: number) {
         const pixelValue = this.drawingLayer.pixelData.playerPixels[player][this.consumedPixels];
         this.consumedPixels++;
         this.yPixels++;
@@ -175,7 +175,7 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = 255;
     }
 
-    fillTransparentPixel() {
+    private fillTransparentPixel() {
         this.yPixels++;
         this.pixels[this.writtenPixelBytes++] = 0;
         this.pixels[this.writtenPixelBytes++] = 0;
@@ -183,11 +183,11 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = 0;
     }
 
-    repeat(n: number, func: () => void) {
+    private repeat(n: number, func: () => void) {
         Array(n).fill(0).map(func);
     }
 
-    addLeftSpacing() {
+    private addLeftSpacing() {
         // When drawing the last row, no left spacing will exist.
         if (!this.spacing[this.yIndex]) {
             return;
@@ -198,7 +198,7 @@ export default class Smx {
         this.yPixels += spacing;
     }
 
-    addRightSpacing() {
+    private addRightSpacing() {
         let spacing = this.spacing[this.yIndex].rightSpacing;
         this.yPixels += spacing;
         this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + spacing * 4);
