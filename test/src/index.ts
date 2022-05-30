@@ -13,18 +13,22 @@ async function start() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d')!;
 
-  let frame = 0;
+  let frame = 10;
   setInterval(async () => {
 
-    const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8, false);
-    const bitmap = await createImageBitmap(imageData);
+  ctx.clearRect(0,0,500,500);
 
-    ctx.clearRect(0,0,500,500)
-    ctx.drawImage(bitmap, 0, 0);
+  const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8, false);
+  const bitmap = await createImageBitmap(imageData);
+  ctx.drawImage(bitmap, 0, 0);
 
-    frame++;
+  const shadow = smx.renderShadow(frame % smx.getFramesCount());
+  const shadowBitmap = await createImageBitmap(shadow);
+  ctx.drawImage(shadowBitmap, 0, 0);
 
-  }, 20);
+  frame++;
+
+  }, 100);
 }
 
 start();
