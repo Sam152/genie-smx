@@ -1,5 +1,6 @@
 import getBit from "../helper/getBit";
 import {Buffer} from "buffer";
+import Commands from "./Commands";
 
 const Struct = require('awestruct');
 const t = Struct.types;
@@ -34,7 +35,7 @@ export const smxStruct = Struct({
     }))
 });
 
-export function parseCommands (commandBuffer: Buffer) {
+export function parseCommands(commandBuffer: Buffer) {
     const commandList: Array<any> = []
     commandBuffer.forEach(commandByte => {
         const lastTwoBits = commandByte & 3
@@ -75,4 +76,68 @@ export const secondaryGraphicStruct = (frameHeight: number) => {
         commandArrayLength: t.uint32,
         commandArray: t.buffer('commandArrayLength'),
     })
+}
+
+type MainImageLayerStruct = {
+    centerX: number;
+    centerY: number;
+    width: number;
+    height: number;
+    layerBytesLength: number;
+    layerType: "main";
+    commands: Array<{ pixels: number; command: Commands; }>;
+    pixelDataArray: Uint8Array;
+}
+
+type SecondaryImageLayerStruct = {
+    centerX: number;
+    centerY: number;
+    width: number;
+    height: number;
+    layerBytesLength: number;
+    layerType: "secondary";
+    commands: Array<{ pixels: number; command: Commands; }>;
+}
+
+export type SmxStruct = {
+    fileDescriptor: string;
+    fileSizeSmp: number;
+    fileSizeSmx: number;
+    numberFrames: number;
+    probablyVersion: number;
+    frames: Array<{
+        frameType: number;
+        paletteNumber: number;
+        possibleUncompressedSize: number;
+        layers: [MainImageLayerStruct, SecondaryImageLayerStruct?, SecondaryImageLayerStruct?];
+    }>
+};
+
+export default function struct(buffer: Buffer): SmxStruct {
+    const parsed = smxStruct(buffer);
+    parsed.frames.map((frame: any) => {
+        frame.layers = frame.layers.map((layer: any, index: number) => {
+            // Conditionally parse the graphics layers of each frame. The first frame will always be the main
+            // graphics layer, while the next two (if they exist) will be the shadows and outline.
+            if (index === 0) {
+                const parsed = mainGraphicStruct(layer.height)(layer.layerData);
+                const commands = parseCommands(parsed.commandArray);
+                return {
+                    ...layer,
+                    layerData: parsed,
+                    pixelDataArray: parsed.pixelDataArray,
+                    commands: commands,
+                    layerType: 'main',
+                }
+            } else {
+                return {
+                    ...layer,
+                    layerData: secondaryGraphicStruct(layer.height)(layer.layerData),
+                    layerType: 'secondary',
+                }
+            }
+        });
+        return frame;
+    });
+    return parsed;
 }

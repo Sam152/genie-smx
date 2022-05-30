@@ -1,10 +1,10 @@
-import {mainGraphicStruct, parseCommands, secondaryGraphicStruct, smxStruct} from "./struct";
+import struct, {SmxStruct} from "./struct";
 import createImageData from "../helper/createImageData";
 import Commands from "./Commands";
 
 export default class Smx {
     private buffer: Buffer;
-    private parsed: any;
+    private parsed: SmxStruct;
 
     private commandIndex!: number;
     private pixelsIndex!: number;
@@ -17,32 +17,7 @@ export default class Smx {
 
     constructor (buffer: Buffer) {
         this.buffer = buffer
-
-        this.parsed = smxStruct(this.buffer)
-        this.parsed.frames.map((frame: any) => {
-            frame.layers = frame.layers.map((layer: any, index: number) => {
-                // Conditionally parse the graphics layers of each frame.
-                if (index === 0) {
-                    const parsed = mainGraphicStruct(layer.height)(layer.layerData);
-                    const commands = parseCommands(parsed.commandArray);
-
-                    return {
-                        ...layer,
-                        layerData: parsed,
-                        pixelDataArray: parsed.pixelDataArray, // @todo, should uint8 be a uint16 array?
-                        commands: commands,
-                        layerType: 'main',
-                    }
-                } else {
-                    return {
-                        layerData: secondaryGraphicStruct(layer.height)(layer.layerData),
-                        layerType: 'secondary',
-                        ...layer,
-                    }
-                }
-            })
-            return frame
-        });
+        this.parsed = struct(this.buffer);
     }
 
     renderFrame (frameIdx: number, player: number, outline: boolean) {
@@ -55,8 +30,6 @@ export default class Smx {
 
         this.imageData = createImageData(this.imageLayer.width, this.imageLayer.height)
         this.pixels = this.imageData.data;
-
-        console.log(this.imageLayer);
 
         this.addLeftSpacing();
         this.imageLayer.commands.forEach(({command, pixels}: any) => {
