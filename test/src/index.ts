@@ -18,17 +18,30 @@ async function start() {
 
   ctx.clearRect(0,0,500,500);
 
-  const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8, false);
-  const bitmap = await createImageBitmap(imageData);
-  ctx.drawImage(bitmap, 0, 0);
+  const position = [150, 150];
+
+  const frameData = smx.getFrame(frame % smx.getFramesCount());
 
   const shadow = smx.renderShadow(frame % smx.getFramesCount());
   const shadowBitmap = await createImageBitmap(shadow);
-  ctx.drawImage(shadowBitmap, 0, 0);
+    ctx.drawImage(
+        shadowBitmap,
+        position[0] - frameData.layers[1]!.centerX,
+        position[1] - frameData.layers[1]!.centerY,
+    );
+
+  const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8);
+  const bitmap = await createImageBitmap(imageData);
+  ctx.drawImage(
+      bitmap,
+      position[0] - frameData.layers[0].centerX,
+      position[1] - frameData.layers[0].centerY,
+  );
+
 
   frame++;
 
-  }, 100);
+  }, 20);
 }
 
 start();

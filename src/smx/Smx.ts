@@ -29,7 +29,11 @@ export default class Smx {
         return this.parsed.frames.length;
     }
 
-    renderFrame (frameIdx: number, player: number, outline: boolean) {
+    getFrame(frameIdx: number) {
+        return this.parsed.frames[frameIdx];
+    }
+
+    renderFrame (frameIdx: number, player: number) {
         this.writtenPixelBytes = 0;
         this.consumedPixels = 0;
         this.yIndex = 0;
@@ -75,62 +79,54 @@ export default class Smx {
 
         this.spacing = this.drawingLayer.layerData.layerRowEdge;
 
-        console.log(this.spacing);
-        console.log(this.frame);
-
-
-        // https://github.com/SFTtech/openage/blob/1988f40a0fcc30d356150ac9e3f0cc9993cad04d/openage/convert/value_object/read/media/smx.pyx#L882
         this.addLeftSpacing();
+
         for (let shadowCommandIndex = 0; shadowCommandIndex < this.drawingLayer.layerData.commandArray.length;) {
             const commandByte = this.drawingLayer.layerData.commandArray[shadowCommandIndex];
             shadowCommandIndex++;
 
-            const lastTwoBits = commandByte & 3;
+            const command = commandByte & 0b11;
             const pixels = (commandByte >> 2) + 1;
 
-            if (lastTwoBits === Commands.Skip) {
-                console.log('Skip', pixels, 'pixels');
+            if (command === Commands.Skip) {
                 this.repeat(pixels, this.fillTransparentPixel.bind(this));
             }
-            else if (lastTwoBits === Commands.Draw) {
-                console.log('Draw', pixels, 'pixels');
+            else if (command === Commands.Draw) {
                 const alphaBytes = this.drawingLayer.layerData.commandArray.slice(shadowCommandIndex, shadowCommandIndex + pixels);
                 alphaBytes.forEach((alphaByte: number) => {
                     this.fillAlphaPixel(alphaByte);
                 });
                 shadowCommandIndex += pixels;
             }
-            else if (lastTwoBits === Commands.EndRow) {
+            else if (command === Commands.EndRow) {
                 this.addRightSpacing();
-                this.yIndex++;
-
+                // Sometimes rows will miss drawing 1 pixel for some reason.
                 if (this.yPixels === this.drawingLayer.width - 1) {
                     this.fillTransparentPixel();
                 }
 
-                console.log('resetting y pixels', this.yPixels);
+                this.yIndex++;
                 this.yPixels = 0;
 
-                let peekedSpacing = this.spacing[this.yIndex] ? this.spacing[this.yIndex].leftSpacing : 0;
-                while (peekedSpacing === -1) {
-                    this.addLeftSpacing();
-                    this.yIndex++;
-                    this.yPixels = 0;
-                    peekedSpacing = this.spacing[this.yIndex] ? this.spacing[this.yIndex].leftSpacing : 0;
-                }
-
-                console.log('End row');
+                this.peekEmptyRows();
                 this.addLeftSpacing();
-            }
-            else {
-                console.error('Command not recognised', lastTwoBits);
             }
         }
 
-        console.log('Total shadow pixels', this.writtenPixelBytes / 4);
-        console.log(this.pixels);
-
         return this.imageData;
+    }
+
+    peekEmptyRows() {
+        let peekedSpacing = this.spacing[this.yIndex] ? this.spacing[this.yIndex].leftSpacing : 0;
+        while (peekedSpacing === -1) {
+            const width = this.drawingLayer.width;
+            this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + width * 4);
+            this.writtenPixelBytes += width * 4;
+
+            this.yIndex++;
+            this.yPixels = 0;
+            peekedSpacing = this.spacing[this.yIndex] ? this.spacing[this.yIndex].leftSpacing : 0;
+        }
     }
 
     fillPixel() {
@@ -190,13 +186,6 @@ export default class Smx {
             return;
         }
         let spacing = this.spacing[this.yIndex].leftSpacing;
-
-        if (spacing === -1) {
-            spacing = this.drawingLayer.width;
-            console.log('negative spacing');
-        }
-
-        console.log('left space index', this.yIndex, 'spacing', spacing, 'pixels');
         this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + spacing * 4);
         this.writtenPixelBytes += spacing * 4;
         this.yPixels += spacing;
@@ -204,14 +193,7 @@ export default class Smx {
 
     addRightSpacing() {
         let spacing = this.spacing[this.yIndex].rightSpacing;
-
-        if (spacing === -1) {
-            spacing = 0;
-        }
-
         this.yPixels += spacing;
-
-        console.log('right space index', this.yIndex, 'spacing', spacing, 'pixels');
         this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + spacing * 4);
         this.writtenPixelBytes += spacing * 4;
     }
