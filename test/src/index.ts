@@ -1,7 +1,7 @@
 import Smx, {PaletteCollectionFactory} from "genie-smx";
 
 async function createSmx() {
-    const palettes = await PaletteCollectionFactory.fromHttp('/static/palettes');
+    const palettes = await PaletteCollectionFactory.fromHttp('./static/palettes');
     const asset = await fetch(`./static/u_arc_crossbowman_walkA_x2.smx`).then((response) => response.arrayBuffer())
     const smx = new Smx(new Buffer(asset), palettes);
     return smx;

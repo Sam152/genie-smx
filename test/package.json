@@ -4,14 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "genie-smx": "link:..",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.3.0",
+    "typescript": "^4.7.2",
     "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.9.0",
-    "genie-smx": "link:.."
+    "webpack-dev-server": "^4.9.0"
   },
   "scripts": {
-    "watch": "webpack serve -c webpack.client.config.js --mode=development"
+    "watch": "webpack serve -c webpack.client.config.js --mode=development",
+    "build": "webpack build -c webpack.client.config.js --mode=development"
   }
 }
