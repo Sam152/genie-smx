@@ -1,0 +1,12 @@
+{
+  "name": "genie-smx",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.7.2"
+  },
+  "scripts": {
+    "build" : "tsc"
+  }
+}
