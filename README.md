@@ -9,3 +9,5 @@ To build and test this project:
 yarn install && tsc
 cd test && yarn install && yarn run watch
 ```
+
+[See it in action](https://sam152.github.io/genie-smx/)
