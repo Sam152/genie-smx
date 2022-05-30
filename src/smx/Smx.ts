@@ -17,7 +17,7 @@ export default class Smx {
     private pixels!: Uint8ClampedArray;
     private palettes: PaletteCollection;
     private spacing: any;
-    private yPixels: number;
+    private yPixels!: number;
 
     constructor (buffer: Buffer, palettes: PaletteCollection) {
         this.buffer = buffer
