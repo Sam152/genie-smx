@@ -33,6 +33,10 @@ export default class Smx {
         return this.parsed.frames[frameIdx];
     }
 
+    getFrames() {
+        return this.parsed.frames;
+    }
+
     public renderFrame (frameIdx: number, player: number) {
         this.writtenPixelBytes = 0;
         this.consumedPixels = 0;
