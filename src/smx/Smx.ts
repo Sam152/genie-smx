@@ -7,8 +7,8 @@ export default class Smx {
     private buffer: Buffer;
     private parsed: SmxStruct;
 
-    private commandIndex!: number;
-    private pixelsIndex!: number;
+    private writtenPixelBytes!: number;
+    private consumedPixels!: number;
     private yIndex!: number;
 
     private frame!: any;
@@ -23,9 +23,13 @@ export default class Smx {
         this.parsed = struct(this.buffer, this.palettes);
     }
 
+    getFramesCount(): number {
+        return this.parsed.frames.length;
+    }
+
     renderFrame (frameIdx: number, player: number, outline: boolean) {
-        this.commandIndex = 0;
-        this.pixelsIndex = 0;
+        this.writtenPixelBytes = 0;
+        this.consumedPixels = 0;
         this.yIndex = 0;
 
         this.frame = this.parsed.frames[frameIdx]!;
@@ -56,27 +60,28 @@ export default class Smx {
     }
 
     fillPixel() {
-        // this.imageLayer.pixelDataArray
-        const pixelValue = [100, 20, 35];
+        const pixelValue = this.imageLayer.pixelData.pixels[this.consumedPixels];
+        this.consumedPixels++;
 
-        this.pixels[++this.commandIndex] = pixelValue[0];
-        this.pixels[++this.commandIndex] = pixelValue[1];
-        this.pixels[++this.commandIndex] = pixelValue[2];
-        this.pixels[++this.commandIndex] = 1;
-    }
-
-    fillRandomPixel() {
-        this.pixels[++this.commandIndex] = Math.random() * 255;
-        this.pixels[++this.commandIndex] = Math.random() * 255;
-        this.pixels[++this.commandIndex] = Math.random() * 255;
-        this.pixels[++this.commandIndex] = 1;
+        const alpha = pixelValue[3] / 255;
+        this.pixels[this.writtenPixelBytes++] = pixelValue[0] * alpha;
+        this.pixels[this.writtenPixelBytes++] = pixelValue[1] * alpha;
+        this.pixels[this.writtenPixelBytes++] = pixelValue[2] * alpha;
+        this.pixels[this.writtenPixelBytes++] = 255;
     }
 
     fillTransparentPixel() {
-        this.pixels[++this.commandIndex] = 0;
-        this.pixels[++this.commandIndex] = 0;
-        this.pixels[++this.commandIndex] = 0;
-        this.pixels[++this.commandIndex] = 0;
+        this.pixels[this.writtenPixelBytes++] = 0;
+        this.pixels[this.writtenPixelBytes++] = 0;
+        this.pixels[this.writtenPixelBytes++] = 0;
+        this.pixels[this.writtenPixelBytes++] = 0;
+    }
+
+    fillRandomPixel() {
+        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
+        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
+        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
+        this.pixels[this.writtenPixelBytes++] = 255;
     }
 
     repeat(n: number, func: () => void) {
@@ -89,14 +94,14 @@ export default class Smx {
             return;
         }
         const spacing = this.imageLayer.layerData.layerRowEdge[this.yIndex].leftSpacing;
-        this.pixels.fill(0, this.commandIndex, this.commandIndex + spacing * 4);
-        this.commandIndex += spacing * 4;
+        this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + spacing * 4);
+        this.writtenPixelBytes += spacing * 4;
     }
 
     addRightSpacing() {
         const spacing = this.imageLayer.layerData.layerRowEdge[this.yIndex].rightSpacing;
-        this.pixels.fill(0, this.commandIndex, this.commandIndex + spacing * 4);
-        this.commandIndex += spacing * 4;
+        this.pixels.fill(0, this.writtenPixelBytes, this.writtenPixelBytes + spacing * 4);
+        this.writtenPixelBytes += spacing * 4;
     }
 
 }

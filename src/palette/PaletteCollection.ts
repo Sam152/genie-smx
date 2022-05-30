@@ -7,4 +7,8 @@ export default class PaletteCollection {
         this.palettes = palettes;
     }
 
+    byNumber(num: number) {
+        return this.palettes[num];
+    }
+
 }

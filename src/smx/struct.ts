@@ -83,7 +83,7 @@ type MainImageLayerStruct = {
     layerBytesLength: number;
     layerType: "main";
     commands: Array<{ pixels: number; command: Commands; }>;
-    pixelDataArray: FourPlusOnePixelArray;
+    pixelData: FourPlusOnePixelArray;
 }
 
 type SecondaryImageLayerStruct = {
@@ -122,7 +122,7 @@ export default function struct(buffer: Buffer, palettes: PaletteCollection): Smx
                 return {
                     ...layer,
                     layerData: parsed,
-                    pixelDataArray: new FourPlusOnePixelArray(parsed.pixelDataArray, palettes),
+                    pixelData: new FourPlusOnePixelArray(frame.paletteNumber, parsed.pixelDataArray, palettes),
                     commands: commands,
                     layerType: 'main',
                 }
