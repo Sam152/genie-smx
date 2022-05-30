@@ -1,6 +1,7 @@
 import struct, {SmxStruct} from "./struct";
 import createImageData from "../helper/createImageData";
 import Commands from "./Commands";
+import PaletteCollection from "../palette/PaletteCollection";
 
 export default class Smx {
     private buffer: Buffer;
@@ -8,24 +9,26 @@ export default class Smx {
 
     private commandIndex!: number;
     private pixelsIndex!: number;
-    private y!: number;
+    private yIndex!: number;
 
     private frame!: any;
     private imageLayer!: any;
     private imageData!: ImageData;
     private pixels!: Uint8ClampedArray;
+    private palettes: PaletteCollection;
 
-    constructor (buffer: Buffer) {
+    constructor (buffer: Buffer, palettes: PaletteCollection) {
         this.buffer = buffer
-        this.parsed = struct(this.buffer);
+        this.palettes = palettes;
+        this.parsed = struct(this.buffer, this.palettes);
     }
 
     renderFrame (frameIdx: number, player: number, outline: boolean) {
         this.commandIndex = 0;
         this.pixelsIndex = 0;
-        this.y = 0;
+        this.yIndex = 0;
 
-        this.frame = this.parsed.frames[frameIdx];
+        this.frame = this.parsed.frames[frameIdx]!;
         this.imageLayer = this.frame.layers[0];
 
         this.imageData = createImageData(this.imageLayer.width, this.imageLayer.height)
@@ -44,7 +47,7 @@ export default class Smx {
             }
             if (command === Commands.EndRow) {
                 this.addRightSpacing();
-                this.y++;
+                this.yIndex++;
                 this.addLeftSpacing();
             }
         });
@@ -53,7 +56,7 @@ export default class Smx {
     }
 
     fillPixel() {
-        const paletteOffset = this.imageLayer.pixelDataArray.readUInt8(++this.pixelsIndex);
+        // this.imageLayer.pixelDataArray
         const pixelValue = [100, 20, 35];
 
         this.pixels[++this.commandIndex] = pixelValue[0];
@@ -82,16 +85,16 @@ export default class Smx {
 
     addLeftSpacing() {
         // When drawing the last row, no left spacing will exist.
-        if (!this.imageLayer.layerData.layerRowEdge[this.y]) {
+        if (!this.imageLayer.layerData.layerRowEdge[this.yIndex]) {
             return;
         }
-        const spacing = this.imageLayer.layerData.layerRowEdge[this.y].leftSpacing;
+        const spacing = this.imageLayer.layerData.layerRowEdge[this.yIndex].leftSpacing;
         this.pixels.fill(0, this.commandIndex, this.commandIndex + spacing * 4);
         this.commandIndex += spacing * 4;
     }
 
     addRightSpacing() {
-        const spacing = this.imageLayer.layerData.layerRowEdge[this.y].rightSpacing;
+        const spacing = this.imageLayer.layerData.layerRowEdge[this.yIndex].rightSpacing;
         this.pixels.fill(0, this.commandIndex, this.commandIndex + spacing * 4);
         this.commandIndex += spacing * 4;
     }

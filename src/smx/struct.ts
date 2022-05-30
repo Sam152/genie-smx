@@ -1,11 +1,13 @@
 import getBit from "../helper/getBit";
 import {Buffer} from "buffer";
 import Commands from "./Commands";
+import PaletteCollection from "../palette/PaletteCollection";
+import FourPlusOnePixelArray from "./FourPlusOnePixelArray";
 
 const Struct = require('awestruct');
 const t = Struct.types;
 
-export const smxStruct = Struct({
+const smxStruct = Struct({
     fileDescriptor: t.string(4),
     probablyVersion: t.int16,
     numberFrames: t.int16,
@@ -17,25 +19,20 @@ export const smxStruct = Struct({
         frameType: t.uint8,
         paletteNumber: t.uint8,
         possibleUncompressedSize: t.uint32,
-
-        layers: t.array(function (struct: any) {
-            return getBit(struct.frameType, 0) + getBit(struct.frameType, 1) + getBit(struct.frameType, 2)
-        }, Struct({
-            width: t.uint16,
-            height: t.uint16,
-            centerX: t.int16,
-            centerY: t.int16,
-            layerBytesLength: t.uint32,
-            unknown: t.uint32,
-
-            layerData: t.buffer(function (struct: any) {
-                return struct.layerBytesLength
-            }),
-        }))
+        layers: t.array((struct: any) => getBit(struct.frameType, 0) + getBit(struct.frameType, 1) + getBit(struct.frameType, 2),
+            Struct({
+                width: t.uint16,
+                height: t.uint16,
+                centerX: t.int16,
+                centerY: t.int16,
+                layerBytesLength: t.uint32,
+                unknown: t.uint32,
+                layerData: t.buffer('layerBytesLength'),
+            }))
     }))
 });
 
-export function parseCommands(commandBuffer: Buffer) {
+function parseCommands(commandBuffer: Buffer) {
     const commandList: Array<any> = []
     commandBuffer.forEach(commandByte => {
         const lastTwoBits = commandByte & 3
@@ -49,7 +46,7 @@ export function parseCommands(commandBuffer: Buffer) {
 }
 
 // The struct used for the main graphics data.
-export const mainGraphicStruct = (frameHeight: number) => {
+const mainGraphicStruct = (frameHeight: number) => {
     return Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
@@ -66,7 +63,7 @@ export const mainGraphicStruct = (frameHeight: number) => {
 }
 
 // The struct used for outlines and shadows.
-export const secondaryGraphicStruct = (frameHeight: number) => {
+const secondaryGraphicStruct = (frameHeight: number) => {
     return Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
@@ -86,7 +83,7 @@ type MainImageLayerStruct = {
     layerBytesLength: number;
     layerType: "main";
     commands: Array<{ pixels: number; command: Commands; }>;
-    pixelDataArray: Uint8Array;
+    pixelDataArray: FourPlusOnePixelArray;
 }
 
 type SecondaryImageLayerStruct = {
@@ -113,7 +110,7 @@ export type SmxStruct = {
     }>
 };
 
-export default function struct(buffer: Buffer): SmxStruct {
+export default function struct(buffer: Buffer, palettes: PaletteCollection): SmxStruct {
     const parsed = smxStruct(buffer);
     parsed.frames.map((frame: any) => {
         frame.layers = frame.layers.map((layer: any, index: number) => {
@@ -125,7 +122,7 @@ export default function struct(buffer: Buffer): SmxStruct {
                 return {
                     ...layer,
                     layerData: parsed,
-                    pixelDataArray: parsed.pixelDataArray,
+                    pixelDataArray: new FourPlusOnePixelArray(parsed.pixelDataArray, palettes),
                     commands: commands,
                     layerType: 'main',
                 }
