@@ -37,6 +37,7 @@ export default class Smx {
         this.writtenPixelBytes = 0;
         this.consumedPixels = 0;
         this.yIndex = 0;
+        this.yPixels = 0;
 
         this.frame = this.parsed.frames[frameIdx]!;
         this.drawingLayer = this.frame.layers[0];
@@ -91,15 +92,18 @@ export default class Smx {
             if (command === Commands.Skip) {
                 this.repeat(pixels, this.fillTransparentPixel.bind(this));
             }
-            else if (command === Commands.Draw) {
+
+            if (command === Commands.Draw) {
                 const alphaBytes = this.drawingLayer.layerData.commandArray.slice(shadowCommandIndex, shadowCommandIndex + pixels);
                 alphaBytes.forEach((alphaByte: number) => {
                     this.fillAlphaPixel(alphaByte);
                 });
                 shadowCommandIndex += pixels;
             }
-            else if (command === Commands.EndRow) {
+
+            if (command === Commands.EndRow) {
                 this.addRightSpacing();
+
                 // Sometimes rows will miss drawing 1 pixel for some reason.
                 if (this.yPixels === this.drawingLayer.width - 1) {
                     this.fillTransparentPixel();
@@ -108,7 +112,10 @@ export default class Smx {
                 this.yIndex++;
                 this.yPixels = 0;
 
+                // Peek empty rows, where an entire row is empty, no commands should be processed,
+                // instead the y value should be incremented and transparent pixels should be written.
                 this.peekEmptyRows();
+
                 this.addLeftSpacing();
             }
         }
