@@ -1,12 +1,27 @@
 {
   "name": "genie-smx",
+  "description": "An SMX file format parser, used by the genie engine.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^17.0.36",
     "typescript": "^4.7.2"
   },
   "scripts": {
-    "build" : "tsc"
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "dependencies": {
+    "awestruct": "^1.2.5",
+    "buffer": "^6.0.3",
+    "jascpal": "^0.1.4"
   }
 }
