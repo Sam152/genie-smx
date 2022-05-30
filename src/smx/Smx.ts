@@ -44,7 +44,7 @@ export default class Smx {
                 this.repeat(pixels, this.fillPixel.bind(this));
             }
             if (command === Commands.DrawPlayer) {
-                this.repeat(pixels, this.fillPixel.bind(this));
+                this.repeat(pixels, () => this.fillPlayerPixel(player));
             }
             if (command === Commands.Skip) {
                 this.repeat(pixels, this.fillTransparentPixel.bind(this));
@@ -67,6 +67,16 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = pixelValue[0] * alpha;
         this.pixels[this.writtenPixelBytes++] = pixelValue[1] * alpha;
         this.pixels[this.writtenPixelBytes++] = pixelValue[2] * alpha;
+        this.pixels[this.writtenPixelBytes++] = 255;
+    }
+
+    fillPlayerPixel(player: number) {
+        const pixelValue = this.imageLayer.pixelData.playerPixels[player][this.consumedPixels];
+        this.consumedPixels++;
+
+        this.pixels[this.writtenPixelBytes++] = pixelValue[0];
+        this.pixels[this.writtenPixelBytes++] = pixelValue[1];
+        this.pixels[this.writtenPixelBytes++] = pixelValue[2];
         this.pixels[this.writtenPixelBytes++] = 255;
     }
 

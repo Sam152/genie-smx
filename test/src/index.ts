@@ -16,7 +16,7 @@ async function start() {
   let frame = 0;
   setInterval(async () => {
 
-    const imageData = smx.renderFrame(frame % smx.getFramesCount(), 1, false);
+    const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8, false);
     const bitmap = await createImageBitmap(imageData);
 
     ctx.clearRect(0,0,500,500)
