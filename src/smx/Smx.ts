@@ -87,13 +87,6 @@ export default class Smx {
         this.pixels[this.writtenPixelBytes++] = 0;
     }
 
-    fillRandomPixel() {
-        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
-        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
-        this.pixels[this.writtenPixelBytes++] = Math.random() * 255;
-        this.pixels[this.writtenPixelBytes++] = 255;
-    }
-
     repeat(n: number, func: () => void) {
         Array(n).fill(0).map(func);
     }
