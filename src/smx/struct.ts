@@ -75,7 +75,7 @@ function secondaryGraphicStruct(frameHeight: number) {
     })
 }
 
-type MainImageLayerStruct = {
+export type MainImageLayerStruct = {
     centerX: number;
     centerY: number;
     width: number;
@@ -86,7 +86,7 @@ type MainImageLayerStruct = {
     pixelData: FourPlusOnePixelArray;
 }
 
-type SecondaryImageLayerStruct = {
+export type SecondaryImageLayerStruct = {
     centerX: number;
     centerY: number;
     width: number;
@@ -96,18 +96,20 @@ type SecondaryImageLayerStruct = {
     commands: Array<{ pixels: number; command: Commands; }>;
 }
 
+export type SmxFrame = {
+    frameType: number;
+    paletteNumber: number;
+    possibleUncompressedSize: number;
+    layers: [MainImageLayerStruct, SecondaryImageLayerStruct?, SecondaryImageLayerStruct?];
+};
+
 export type SmxStruct = {
     fileDescriptor: string;
     fileSizeSmp: number;
     fileSizeSmx: number;
     numberFrames: number;
     probablyVersion: number;
-    frames: Array<{
-        frameType: number;
-        paletteNumber: number;
-        possibleUncompressedSize: number;
-        layers: [MainImageLayerStruct, SecondaryImageLayerStruct?, SecondaryImageLayerStruct?];
-    }>
+    frames: Array<SmxFrame>
 };
 
 export default function struct(buffer: Buffer, palettes: PaletteCollection): SmxStruct {
