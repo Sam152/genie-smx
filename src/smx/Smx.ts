@@ -72,11 +72,17 @@ export default class Smx {
             if (command === Commands.EndRow) {
                 this.addRightSpacing();
                 this.yIndex++;
+                this.peekEmptyRows();
                 this.addLeftSpacing();
             }
         });
 
         return this.imageData;
+    }
+
+    public hasShadow(frameIdx: number): boolean {
+        this.frame = this.parsed.frames[frameIdx]!;
+        return typeof this.frame.layers[1] !== 'undefined';
     }
 
     public renderShadow (frameIdx: number) {

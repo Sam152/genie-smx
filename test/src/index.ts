@@ -2,7 +2,7 @@ import Smx, {PaletteCollectionFactory} from "genie-smx";
 
 async function createSmx() {
     const palettes = await PaletteCollectionFactory.fromHttp('./static/palettes');
-    const asset = await fetch(`./static/u_arc_crossbowman_walkA_x2.smx`).then((response) => response.arrayBuffer())
+    const asset = await fetch(`./static/u_arc_crossbowman_decayA_x2.smx`).then((response) => response.arrayBuffer())
     const smx = new Smx(new Buffer(asset), palettes);
     return smx;
 }
@@ -19,17 +19,21 @@ async function start() {
 
         const position = [150, 150];
 
-        const frameData = smx.getFrame(frame % smx.getFramesCount());
+        const frameNumber = frame % smx.getFramesCount();
 
-        const shadow = smx.renderShadow(frame % smx.getFramesCount());
-        const shadowBitmap = await createImageBitmap(shadow);
-        ctx.drawImage(
-            shadowBitmap,
-            position[0] - frameData.layers[1]!.centerX,
-            position[1] - frameData.layers[1]!.centerY,
-        );
+        const frameData = smx.getFrame(frameNumber);
 
-        const imageData = smx.renderFrame(frame % smx.getFramesCount(), 8);
+        if (smx.hasShadow(frameNumber)) {
+            const shadow = smx.renderShadow(frameNumber);
+            const shadowBitmap = await createImageBitmap(shadow);
+            ctx.drawImage(
+                shadowBitmap,
+                position[0] - frameData.layers[1]!.centerX,
+                position[1] - frameData.layers[1]!.centerY,
+            );
+        }
+
+        const imageData = smx.renderFrame(frameNumber, 8);
         const bitmap = await createImageBitmap(imageData);
         ctx.drawImage(
             bitmap,
