@@ -33,6 +33,14 @@ export default class Smx {
         return this.parsed.frames[frameIdx];
     }
 
+    public getImageLayer(frameIdx: number) {
+        return this.getFrame(frameIdx).layers[0];
+    }
+
+    public getShadowLayer(frameIdx: number) {
+        return this.getFrame(frameIdx).layers[1];
+    }
+
     getFrames() {
         return this.parsed.frames;
     }
