@@ -19,7 +19,7 @@ export default class Smx {
     private spacing: any;
     private yPixels!: number;
 
-    constructor (buffer: Buffer, palettes: PaletteCollection) {
+    constructor(buffer: Buffer, palettes: PaletteCollection) {
         this.buffer = buffer
         this.palettes = palettes;
         this.parsed = struct(this.buffer, this.palettes);
@@ -45,7 +45,7 @@ export default class Smx {
         return this.parsed.frames;
     }
 
-    public renderFrame (frameIdx: number, player: number) {
+    public renderFrame(frameIdx: number, player: number) {
         this.writtenPixelBytes = 0;
         this.consumedPixels = 0;
         this.yIndex = 0;
@@ -76,7 +76,6 @@ export default class Smx {
                 this.addLeftSpacing();
             }
         });
-
         return this.imageData;
     }
 
@@ -85,7 +84,7 @@ export default class Smx {
         return typeof this.frame.layers[1] !== 'undefined';
     }
 
-    public renderShadow (frameIdx: number) {
+    public renderShadow(frameIdx: number) {
         this.writtenPixelBytes = 0;
         this.yIndex = 0;
         this.yPixels = 0;
@@ -202,7 +201,9 @@ export default class Smx {
     }
 
     private repeat(n: number, func: () => void) {
-        Array(n).fill(0).map(func);
+        for (let i = 0; i < n; i++) {
+            func();
+        }
     }
 
     private addLeftSpacing() {

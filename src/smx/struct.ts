@@ -46,8 +46,12 @@ function parseCommands(commandBuffer: Buffer) {
 }
 
 // The struct used for the main graphics data.
+const mainStructs: Record<number, typeof Struct> = {};
 function mainGraphicStruct(frameHeight: number) {
-    return Struct({
+    if (mainStructs[frameHeight]) {
+        return mainStructs[frameHeight];
+    }
+    mainStructs[frameHeight] = Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
                 rightSpacing: t.int16,
@@ -59,7 +63,8 @@ function mainGraphicStruct(frameHeight: number) {
         pixelDataArray: t.buffer(function (struct: any) {
             return struct.pixelDataArrayLength;
         }),
-    })
+    });
+    return mainStructs[frameHeight];
 }
 
 // The struct used for outlines and shadows.
