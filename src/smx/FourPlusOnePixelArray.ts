@@ -34,22 +34,11 @@ export default class FourPlusOnePixelArray {
 
         for (let index = 0; index < this.buffer.length; index += 5) {
             const lastByte = this.buffer[index + 4];
-            const [
-                px1Section,
-                px2Section,
-                px3Section,
-                px4Section,
-            ] = [
-                this.extractTwoBits(lastByte, 0) * 256,
-                this.extractTwoBits(lastByte, 2) * 256,
-                this.extractTwoBits(lastByte, 4) * 256,
-                this.extractTwoBits(lastByte, 6) * 256,
-            ];
             pixels.push(
-                palette[this.buffer[index] + px1Section],
-                palette[this.buffer[index + 1] + px2Section],
-                palette[this.buffer[index + 2] + px3Section],
-                palette[this.buffer[index + 3] + px4Section],
+                palette[this.buffer[index] + this.extractTwoBits(lastByte, 0) * 256],
+                palette[this.buffer[index + 1] + this.extractTwoBits(lastByte, 2) * 256],
+                palette[this.buffer[index + 2] + this.extractTwoBits(lastByte, 4) * 256],
+                palette[this.buffer[index + 3] + this.extractTwoBits(lastByte, 6) * 256],
             );
         }
         return pixels;
