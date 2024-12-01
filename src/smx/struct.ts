@@ -47,6 +47,7 @@ function parseCommands(commandBuffer: Buffer) {
 
 // The struct used for the main graphics data.
 const mainStructs: Record<number, typeof Struct> = {};
+
 function mainGraphicStruct(frameHeight: number) {
     if (mainStructs[frameHeight]) {
         return mainStructs[frameHeight];

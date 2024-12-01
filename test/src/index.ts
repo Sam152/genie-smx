@@ -3,7 +3,9 @@ import Smx, {PaletteCollectionFactory} from "genie-smx";
 async function createSmx() {
     const palettes = await PaletteCollectionFactory.fromHttp('./static/palettes');
     const asset = await fetch(`./static/u_arc_crossbowman_decayA_x2.smx`).then((response) => response.arrayBuffer())
+    console.time('Generating SMX');
     const smx = new Smx(new Buffer(asset), palettes);
+    console.timeEnd('Generating SMX');
     return smx;
 }
 
