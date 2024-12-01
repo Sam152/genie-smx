@@ -1,5 +1,4 @@
 import struct, {SmxStruct} from "./struct";
-import createImageData from "../helper/createImageData";
 import Commands from "./Commands";
 import PaletteCollection from "../palette/PaletteCollection";
 
@@ -55,7 +54,7 @@ export default class Smx {
         this.drawingLayer = this.frame.layers[0];
         this.spacing = this.drawingLayer.layerData.layerRowEdge;
 
-        this.imageData = createImageData(this.drawingLayer.width, this.drawingLayer.height)
+        this.imageData = new ImageData(this.drawingLayer.width, this.drawingLayer.height);
         this.pixels = this.imageData.data;
 
         this.addLeftSpacing();
@@ -92,7 +91,7 @@ export default class Smx {
         this.frame = this.parsed.frames[frameIdx]!;
         this.drawingLayer = this.frame.layers[1];
 
-        this.imageData = createImageData(this.drawingLayer.width, this.drawingLayer.height)
+        this.imageData = new ImageData(this.drawingLayer.width, this.drawingLayer.height);
         this.pixels = this.imageData.data;
 
         this.spacing = this.drawingLayer.layerData.layerRowEdge;
