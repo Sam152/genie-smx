@@ -68,8 +68,12 @@ function mainGraphicStruct(frameHeight: number) {
 }
 
 // The struct used for outlines and shadows.
+const secondaryStructs: Record<number, typeof Struct> = {};
 function secondaryGraphicStruct(frameHeight: number) {
-    return Struct({
+    if (secondaryStructs[frameHeight]) {
+        return secondaryStructs[frameHeight];
+    }
+    secondaryStructs[frameHeight] = Struct({
         layerRowEdge: t.array(frameHeight, Struct({
                 leftSpacing: t.int16,
                 rightSpacing: t.int16,
@@ -77,7 +81,8 @@ function secondaryGraphicStruct(frameHeight: number) {
         ),
         commandArrayLength: t.uint32,
         commandArray: t.buffer('commandArrayLength'),
-    })
+    });
+    return secondaryStructs[frameHeight];
 }
 
 export type MainImageLayerStruct = {
