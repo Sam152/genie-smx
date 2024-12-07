@@ -6,6 +6,18 @@ async function createSmx() {
     console.time('Generating SMX');
     const smx = new Smx(new Buffer(asset), palettes);
     console.timeEnd('Generating SMX');
+
+    console.time('Rendering frames');
+    for (let i =0; i < smx.getFramesCount();i++) {
+        if (smx.hasShadow(i)) {
+            const shadow = smx.renderShadow(i);
+            await createImageBitmap(shadow);
+        }
+        const imageData = smx.renderFrame(i, 8);
+        await createImageBitmap(imageData);
+    }
+    console.timeEnd('Rendering frames');
+
     return smx;
 }
 
