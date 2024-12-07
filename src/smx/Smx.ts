@@ -153,7 +153,7 @@ export default class Smx {
     }
 
     private fillPixel() {
-        const pixelValue = this.drawingLayer.pixelData.pixels[this.consumedPixels];
+        const pixelValue = this.drawingLayer.pixelData.pixelAt(this.consumedPixels);
         this.consumedPixels++;
         this.yPixels++;
 
@@ -181,7 +181,7 @@ export default class Smx {
     }
 
     private fillPlayerPixel(player: number) {
-        const pixelValue = this.drawingLayer.pixelData.playerPixels[player][this.consumedPixels];
+        const pixelValue = this.drawingLayer.pixelData.pixelAt(this.consumedPixels, player);
         this.consumedPixels++;
         this.yPixels++;
 
