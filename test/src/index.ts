@@ -59,4 +59,4 @@ async function start() {
     }, 20);
 }
 
-start();
+createSmx();
