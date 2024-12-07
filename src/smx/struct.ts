@@ -125,26 +125,20 @@ export type SmxStruct = {
 
 export default function struct(buffer: Buffer, palettes: PaletteCollection): SmxStruct {
     const parsed = smxStruct(buffer);
-    parsed.frames.map((frame: any) => {
-        frame.layers = frame.layers.map((layer: any, index: number) => {
+    parsed.frames.forEach((frame: any) => {
+        frame.layers.forEach((layer: any, index: number) => {
             // Conditionally parse the graphics layers of each frame. The first frame will always be the main
             // graphics layer, while the next two (if they exist) will be the shadows and outline.
             if (index === 0) {
                 const parsed = mainGraphicStruct(layer.height)(layer.layerData);
                 const commands = parseCommands(parsed.commandArray);
-                return {
-                    ...layer,
-                    layerData: parsed,
-                    pixelData: new FourPlusOnePixelArray(frame.paletteNumber, parsed.pixelDataArray, palettes),
-                    commands: commands,
-                    layerType: 'main',
-                }
+                layer.layerData = parsed;
+                layer.pixelData = new FourPlusOnePixelArray(frame.paletteNumber, parsed.pixelDataArray, palettes);
+                layer.commands = commands;
+                layer.layerType = 'main';
             } else {
-                return {
-                    ...layer,
-                    layerData: secondaryGraphicStruct(layer.height)(layer.layerData),
-                    layerType: 'secondary',
-                }
+                layer.layerData = secondaryGraphicStruct(layer.height)(layer.layerData);
+                layer.layerType = 'secondary';
             }
         });
         return frame;

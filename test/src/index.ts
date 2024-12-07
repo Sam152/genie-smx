@@ -7,6 +7,7 @@ async function createSmx() {
     const smx = new Smx(new Buffer(asset), palettes);
     console.timeEnd('Generating SMX');
 
+    console.log(`Frame count: ${smx.getFramesCount()}`);
     console.time('Rendering frames');
     for (let i =0; i < smx.getFramesCount();i++) {
         if (smx.hasShadow(i)) {
@@ -59,4 +60,4 @@ async function start() {
     }, 20);
 }
 
-start();
+createSmx();
